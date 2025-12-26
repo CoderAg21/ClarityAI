@@ -112,7 +112,7 @@ export default function Footer() {
               </a>
             </div>
           </div>
-          <div className="text-white text-center my-4">Made with heart by <span className='text-blue-300'><a href="https://www.linkedin.com/in/abhay-agrahari-73714831b/" target='blank'>CoderAg21</a></span></div>
+          <div className="text-white text-center my-4">Made with 💖 by <span className='text-blue-300'><a href="https://www.linkedin.com/in/abhay-agrahari-73714831b/" target='blank'>CoderAg21</a></span></div>
         </div>
 
       </div>
