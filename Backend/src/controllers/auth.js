@@ -4,25 +4,36 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 
-const generateAccessAndRefreshTokens = async (userId) =>{
+const generateAccessAndRefreshTokens = async (userId) => {
     try {
-        console.log("shuru to hua")
-        const user = await User.findById(userId)
-        if(!user){
-            console.log("user ni mila yrr")
+        console.log("Token generation started...");
+        const user = await User.findById(userId);
+        
+        if (!user) {
+            console.log("User not found in DB");
+            throw new ApiError(404, "User not found");
         }
-        const accessToken = user.generateAccessToken()
-        const refreshToken = user.generateRefreshToken()
 
-        user.refreshToken = refreshToken
-        await user.save ({validateBeforeSave : false})
-        return { accessToken, refreshToken }
+        // Call the methods defined in your userSchema
+        const accessToken = user.generateAccessToken();
+        const refreshToken = user.generateRefreshToken();
+
+        // Attach the refresh token to the user document
+        user.refreshToken = refreshToken;
+
+        /** * CRITICAL: validateBeforeSave: false only skips Schema validation.
+         * It STILL runs the pre-save hooks. 
+         * Ensure your pre-save hook has the 'isModified' check!
+         */
+        await user.save({ validateBeforeSave: false });
+
+        return { accessToken, refreshToken };
 
     } catch (error) {
-        console.log("messedup!")
-        throw new ApiError (500 , "Error during generating tokens")
+        console.error("Token Generation Failed:", error);
+        throw new ApiError(500, "Something went wrong while generating tokens");
     }
-}
+};
 
 const registerUser = asyncHandler(async (req, res) => {
     console.log("📥 Incoming register request:", req.body); 

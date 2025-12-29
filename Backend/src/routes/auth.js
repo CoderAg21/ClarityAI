@@ -3,7 +3,7 @@ import { registerUser, loginUser , refreshAccessToken} from '../controllers/auth
 
 const router = express.Router();
 
-console.log("DEBUG:", { registerUser, loginUser, refreshAccessToken });
+//console.log("DEBUG:", { registerUser, loginUser, refreshAccessToken });
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);

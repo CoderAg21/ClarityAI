@@ -18,14 +18,24 @@ const userSchema = new mongoose.Schema({
     learningMetrics: {
         totalTasksCompleted: { type: Number, default: 0 },
         lastAIGenReflection: { type: String }
+    },
+     refreshToken: {
+        type: String,
     }
 }, { timestamps: true });
 
 // --- PASSWORD HASHING ---
-userSchema.pre("save", async function (next) {
-    if (!this.isModified("password")) return next();
-    this.password = await bcrypt.hash(this.password, 10);
-    next();
+userSchema.pre("save", async function () {
+    // 1. Only hash if modified
+    if (!this.isModified("password")) return; 
+
+    try {
+        // 2. Hash the password
+        this.password = await bcrypt.hash(this.password, 10);
+        // No next() call needed!
+    } catch (error) {
+        throw error; // Mongoose will catch this as a validation error
+    }
 });
 
 // --- METHODS ---
@@ -38,7 +48,7 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 userSchema.methods.generateAccessToken = function () {
     return jwt.sign(
         { _id: this._id, email: this.email },
-        process.env.JWT_ACCESS_SECRET, // Make sure this matches your .env
+        process.env.ACCESS_TOKEN_SECRET, // Make sure this matches your .env
         { expiresIn: "15m" }
     );
 };
@@ -47,7 +57,7 @@ userSchema.methods.generateAccessToken = function () {
 userSchema.methods.generateRefreshToken = function () {
     return jwt.sign(
         { _id: this._id },
-        process.env.JWT_REFRESH_SECRET, // Make sure this matches your .env
+        process.env.REFRESH_TOKEN_SECRET, // Make sure this matches your .env
         { expiresIn: "7d" }
     );
 };
