@@ -1,10 +1,9 @@
-import Task from "../models/Task.js"; // Import the model above
+import Task from "../models/Task.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 
 // 1. GET TASKS (For Calendar View)
-// Returns tasks overlapping the requested start/end range
 export const getTasks = asyncHandler(async (req, res) => {
     const { start, end } = req.query;
     const userId = req.user._id;
@@ -13,10 +12,8 @@ export const getTasks = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Start and End dates are required");
     }
 
-    // Find tasks that overlap with the view range
     const tasks = await Task.find({
         userId,
-        // Filter: Task Start < Range End AND Task End > Range Start
         start: { $lt: new Date(end) },
         end: { $gt: new Date(start) },
         status: { $ne: "skipped" }
@@ -29,19 +26,31 @@ export const getTasks = asyncHandler(async (req, res) => {
 
 // 2. CREATE TASK (Manual Entry)
 export const createTask = asyncHandler(async (req, res) => {
-    const { title, duration, priority, date, start } = req.body;
+    // Destructure ALL fields sent from Frontend
+    const {
+        title,
+        duration,
+        description,
+        priority,
+        category,
+        date,
+        dueDate,
+        start
+    } = req.body;
+
     const userId = req.user._id;
 
     if (!title || !duration) {
         throw new ApiError(400, "Title and Duration are required");
     }
 
-    // If manual start is provided, calculate end. Otherwise leave pending.
+    // Calculate End Time if Start is provided
     let calculatedEnd = null;
     let finalStatus = "pending";
 
     if (start) {
         const startTime = new Date(start);
+        // duration is in minutes
         calculatedEnd = new Date(startTime.getTime() + duration * 60000);
         finalStatus = "scheduled";
     }
@@ -49,12 +58,20 @@ export const createTask = asyncHandler(async (req, res) => {
     const task = await Task.create({
         userId,
         title,
-        duration,
+        description: description || "", // Save description/notes
+        category: category || "work",   // Save category
         priority: priority || 2,
+        duration,
+
+        // Date handling
         date: date || new Date(),
+        dueDate: dueDate || date || new Date(),
+
+        // Scheduling
         start: start || null,
         end: calculatedEnd,
         status: finalStatus,
+
         createdBy: "manual"
     });
 
@@ -63,31 +80,50 @@ export const createTask = asyncHandler(async (req, res) => {
     );
 });
 
-// 3. UPDATE TASK (Drag & Drop / Resize)
+// 3. UPDATE TASK (Drag & Drop / Resize / Edit)
 export const updateTask = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { start, end, title, priority, status } = req.body;
 
-    // Find task and ensure ownership
+    // Destructure ALL potential updates
+    const {
+        title,
+        description,
+        priority,
+        category,
+        status,
+        start,
+        end,
+        date,
+        dueDate
+    } = req.body;
+
     const task = await Task.findOne({ _id: id, userId: req.user._id });
     if (!task) {
         throw new ApiError(404, "Task not found");
     }
 
-    // Update fields if provided
+    // Update fields if they exist in the request
     if (title) task.title = title;
     if (priority) task.priority = priority;
     if (status) task.status = status;
+    if (category) task.category = category;
+    if (date) task.date = date;
+    if (dueDate) task.dueDate = dueDate;
 
-    // Handle Rescheduling (Drag & Drop)
+    // Special check for description: Allow empty string to clear it
+    if (description !== undefined) {
+        task.description = description;
+    }
+
+    // Handle Calendar Drag & Drop (Rescheduling)
     if (start && end) {
         task.start = start;
         task.end = end;
         task.status = "scheduled";
 
-        // Recalculate duration just in case
+        // Recalculate duration automatically based on new start/end
         const diffMs = new Date(end) - new Date(start);
-        task.duration = Math.round(diffMs / 60000);
+        task.duration = Math.round(diffMs / 60000); // Convert ms to minutes
     }
 
     await task.save();

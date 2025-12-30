@@ -1,25 +1,20 @@
-import { Router } from "express";
-import { protect } from '../middlewares/auth.js';
-import {
-    getTasks,
-    createTask,
-    updateTask,
-    deleteTask
+import express from 'express';
+import { 
+    getTasks, 
+    createTask, 
+    updateTask, 
+    deleteTask 
 } from "../controllers/task.controller.js";
+import { protect } from '../middlewares/auth.js';
 
-const router = Router();
+const router = express.Router();
 
-// Apply Auth Middleware to all task routes
-router.use(protect);
+// Route: /api/tasks/
+router.get('/', protect, getTasks);
+router.post('/', protect, createTask);
 
-// Route: /api/v1/tasks
-router.route("/")
-    .get(getTasks)    // Fetch tasks for calendar
-    .post(createTask); // Manual create
-
-// Route: /api/v1/tasks/:id
-router.route("/:id")
-    .put(updateTask)   // Drag & drop updates
-    .delete(deleteTask); // Delete
+// Route: /api/tasks/:id
+router.put('/:id', protect, updateTask);
+router.delete('/:id', protect, deleteTask);
 
 export default router;

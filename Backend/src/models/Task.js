@@ -17,7 +17,13 @@ const TaskSchema = new mongoose.Schema(
 
         description: {
             type: String,
-            default: ""
+            default: "" // Matches 'note' from frontend
+        },
+
+        category: {
+            type: String,
+            enum: ["work", "personal", "health", "learning"], // Matches frontend options
+            default: "work"
         },
 
         duration: {
@@ -27,17 +33,23 @@ const TaskSchema = new mongoose.Schema(
         },
 
         priority: {
-            type: Number, // 1 = high, 3 = low
+            type: Number, // 1 = high, 2 = medium, 3 = low
             default: 2,
             index: true
         },
 
         date: {
-            type: Date, // intended day (optional)
+            type: Date, // The intended "Scheduled Date"
             index: true
         },
+        
+        // Optional Due Date (if different from scheduled date)
+        dueDate: {
+            type: Date,
+            default: null
+        },
 
-        // 🔑 Backend-assigned start/end (final source of truth)
+        // 🔑 Backend-assigned start/end (final source of truth for Calendar)
         start: {
             type: Date,
             default: null,
@@ -56,15 +68,15 @@ const TaskSchema = new mongoose.Schema(
             default: "pending"
         },
 
-        // 🤖 AI hints / suggestions (safe, optional)
+        // 🤖 AI hints / suggestions
         aiHints: {
             flexibility: {
                 type: String,
                 enum: ["low", "medium", "high"],
                 default: "medium"
             },
-            suggestedStart: { type: Date, default: null }, // AI startTime
-            suggestedEnd: { type: Date, default: null }    // AI endTime
+            suggestedStart: { type: Date, default: null },
+            suggestedEnd: { type: Date, default: null }
         },
 
         createdBy: {
