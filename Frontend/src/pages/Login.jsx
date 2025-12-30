@@ -41,7 +41,7 @@ export default function Login() {
 
         // Wait 3 seconds then redirect
         setTimeout(() => {
-          navigate("/dashboard");
+        window.location.href = '/dashboard';
         }, 3000);
       } else {
         setFeedback({
