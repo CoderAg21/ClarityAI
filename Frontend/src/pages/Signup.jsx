@@ -39,7 +39,7 @@ export default function Signup() {
           msg: result.message || "Account created successfully!",
         });
         // Redirect after 3 seconds
-        setTimeout(() => navigate("/login"), 3000);
+        setTimeout(() => navigate("/login"), 1500);
       } else {
         setFeedback({
           type: "error",

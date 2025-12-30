@@ -13,6 +13,7 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setFeedback({ type: "", msg: "" });
+
     const formData = {
       identifier: e.target.identifier.value,
       password: e.target.password.value,
@@ -24,22 +25,32 @@ export default function Login() {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
+        credentials: "include", 
         body: JSON.stringify(formData),
       });
 
       const result = await response.json();
 
       if (response.ok) {
+        // ✅ 1. SAVE TOKEN TO LOCAL STORAGE
+        // Your backend returns: { data: { accessToken: "..." }, message: "..." }
+        if (result.data && result.data.accessToken) {
+            localStorage.setItem("accessToken", result.data.accessToken);
+            
+            // Optional: Save user details too if you want to display name immediately
+            // localStorage.setItem("user", JSON.stringify(result.data.user)); 
+        }
+
         setFeedback({
           type: "success",
           msg: result.message || "Login Successful!",
         });
 
-     
+        // ✅ 2. REDIRECT
         setTimeout(() => {
-        window.location.href = '/dashboard';
-        }, 3000);
+          window.location.href = '/dashboard';
+        }, 1500); 
+        
       } else {
         setFeedback({
           type: "error",
@@ -47,6 +58,7 @@ export default function Login() {
         });
       }
     } catch (error) {
+      console.error(error);
       setFeedback({ type: "error", msg: "Connection to server failed" });
     } finally {
       setLoading(false);
