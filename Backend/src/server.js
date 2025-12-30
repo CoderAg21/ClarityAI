@@ -16,9 +16,11 @@ app.use(cookieParser())
 
 //routes
 import userRouter from './routes/auth.js'
+import taskRouter from './routes/task.routes.js'
 
 //declaration of routes
 app.use("/api/auth",userRouter)
+app.use("/api/task",taskRouter)
 
 app.use((err,_, res, next) => {
   console.error("🔥 Error Handler:", err);
