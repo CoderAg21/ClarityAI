@@ -1,8 +1,12 @@
+import dotenv from "dotenv";
+dotenv.config();
+ // <--- THIS MAGIC LINE FIXES THE KEY LOADING
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Initialize Gemini
+// Ensure we use the 'gemini-1.5-flash' model (The free, stable one)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 /**
  * The Master Function: Converts raw text -> Structured Plan
