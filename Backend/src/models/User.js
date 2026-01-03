@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
     
     // --- NEW CLARITY AI FIELDS ---
     whatsappNumber: { type: String }, // For WhatsApp notifications
+    timezone: { type: String, default: "Asia/Kolkata" },
 
     onboardingData: {
         workHours: { 
@@ -38,7 +39,10 @@ const userSchema = new mongoose.Schema({
         }
     },
     // -----------------------------
-
+    pendingTask: {
+    type: Object,
+    default: null
+},
     refreshToken: {
         type: String,
     }
@@ -72,6 +76,8 @@ userSchema.methods.generateAccessToken = function () {
         { expiresIn: "15m" }
     );
 };
+
+
 
 // Refresh Token
 userSchema.methods.generateRefreshToken = function () {

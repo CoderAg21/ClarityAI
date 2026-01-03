@@ -29,7 +29,11 @@ export const analyzeUserCommand = async (command, userContext) => {
     Analyze the user's raw command: "${command}" and output a strictly valid JSON object.
     
     RULES:
-    1. INTENT: Identify if this is "ADD_TASK", "RESCHEDULE", "QUERY", or "FEEDBACK".
+    1. INTENT: 
+       - "ADD_TASK": New tasks.
+       - "CONFIRM_TASK": User accepts a suggestion (e.g., "Yes", "Okay", "Do it", "That works").
+       - "REJECT_TASK": User declines a suggestion (e.g., "No", "Cancel", "I don't want to").
+       - "RESCHEDULE", "QUERY", "FEEDBACK".
     2. TIME:
        - If user says "at 5", and it is currently 10 AM, assume 5 PM (17:00).
        - If user says "at 5", and it is currently 6 PM, assume 5 PM Tomorrow.

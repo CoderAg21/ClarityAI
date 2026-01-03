@@ -5,7 +5,7 @@ import { verifyJWT } from "../middlewares/auth.js"; // Your existing auth middle
 const router = Router();
 
 // Protected Route: User must be logged in to talk to Clarity AI
-router.route("/test-command").post(processCommand);
+
 router.route("/command").post(verifyJWT, processCommand);
 
 export default router;
