@@ -1,91 +1,97 @@
+
 import mongoose from "mongoose";
 
-const TaskSchema = new mongoose.Schema(
-    {
-        userId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-            index: true
-        },
+const taskSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
 
-        title: {
-            type: String,
-            required: true,
-            trim: true
-        },
+  title: {
+    type: String,
+    required: true,
+    index: true
+  },
 
-        description: {
-            type: String,
-            default: "" // Matches 'note' from frontend
-        },
+  originalCommand: {
+    type: String,
+  },
 
-        category: {
-            type: String,
-            enum: ["work", "personal", "health", "learning"], // Matches frontend options
-            default: "work"
-        },
+  description: {
+    type: String,
+    default: ""
+  },
 
-        duration: {
-            type: Number, // in minutes
-            required: true,
-            min: 5
-        },
+  category: {
+    type: String,
+    enum: ["work", "personal", "health", "learning"],
+    default: "work"
+  },
 
-        priority: {
-            type: Number, // 1 = high, 2 = medium, 3 = low
-            default: 2,
-            index: true
-        },
+  priority: {
+    type: mongoose.Schema.Types.Mixed, 
+    enum: ["High", "Medium", "Low", 1, 2, 3],
+    default: "Medium"
+  },
 
-        date: {
-            type: Date, // The intended "Scheduled Date"
-            index: true
-        },
-        
-        // Optional Due Date (if different from scheduled date)
-        dueDate: {
-            type: Date,
-            default: null
-        },
+  // Calendar Fields used by Controller
+  start: {
+    type: Date,
+    default: null
+  },
 
-        // 🔑 Backend-assigned start/end (final source of truth for Calendar)
-        start: {
-            type: Date,
-            default: null,
-            index: true
-        },
+  end: {
+    type: Date,
+    default: null
+  },
 
-        end: {
-            type: Date,
-            default: null,
-            index: true
-        },
+  date: {
+    type: Date,
+    default: new Date()
+  },
 
-        status: {
-            type: String,
-            enum: ["pending", "scheduled", "completed", "skipped"],
-            default: "pending"
-        },
+  dueDate: {
+    type: Date,
+    default: new Date()
+  },
 
-        // 🤖 AI hints / suggestions
-        aiHints: {
-            flexibility: {
-                type: String,
-                enum: ["low", "medium", "high"],
-                default: "medium"
-            },
-            suggestedStart: { type: Date, default: null },
-            suggestedEnd: { type: Date, default: null }
-        },
+  duration: {
+    type: Number // in minutes
+  },
 
-        createdBy: {
-            type: String,
-            enum: ["manual", "ai"],
-            default: "manual"
-        }
-    },
-    { timestamps: true }
-);
+  isFixed: {
+    type: Boolean,
+    default: false
+  },
 
-export default mongoose.model("Task", TaskSchema);
+  status: {
+    type: String,
+    enum: [
+      "Completed",
+      "rescheduled",
+      "pending",
+      "scheduled",
+      "skipped"
+    ],
+    default: "Pending"
+  },
+
+  rescheduleCount: {
+    type: Number,
+    default: 0
+  },
+
+  actualDuration: {
+    type: Number
+  },
+
+  createdBy: {
+    type: String,
+    enum: ["manual", "ai"],
+    default: "manual"
+  }
+
+}, { timestamps: true });
+
+export const Task = mongoose.model("Task", taskSchema);
